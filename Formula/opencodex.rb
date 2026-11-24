@@ -25,7 +25,7 @@ class Opencodex < Formula
     <<~EOS
       Run ocx start to start the proxy, or ocx service to install its background service.
       Open the dashboard at http://localhost:10100.
-      Update this installation with brew upgrade --formula chakachakakhan/tap/opencodex.
+      Update this installation with brew upgrade --formula shockakhan/tap/opencodex.
     EOS
   end
 

@@ -24,6 +24,8 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - name: Update both packages from one complete official stable release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python3 .github/scripts/update_opencodex.py
       - name: Open routine update pull request
         if: github.ref == 'refs/heads/main'

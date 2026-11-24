@@ -31,7 +31,7 @@ jobs:
 
       - name: Check syntax and style across the full tap
         run: |
-          brew readall --aliases --os=all --arch=all chakachakakhan/tap
+          brew readall --aliases --os=all --arch=all shockakhan/tap
           brew style Formula/*.rb Casks/*.rb
 
       - name: Run all updater and publication policy tests

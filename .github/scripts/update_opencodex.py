@@ -1,9 +1,9 @@
 """Keep both Homebrew packages on one complete official OpenCodex release."""
 
-import json
 import re
-import subprocess
 from pathlib import Path
+
+from merge_update import fetch_json
 
 ORIGIN = "https://github.com/lidge-jun/opencodex/releases/download"
 PACKAGE_ASSETS = {
@@ -97,13 +97,9 @@ def update_packages(originals, release):
 
 
 if __name__ == "__main__":
-    response = subprocess.check_output([
-        "curl", "--proto", "=https", "--tlsv1.2", "--fail", "--silent",
-        "--show-error", "--location", "--retry", "3", "--max-time", "60",
-        "https://api.github.com/repos/lidge-jun/opencodex/releases/latest",
-    ], text=True)
+    release = fetch_json("https://api.github.com/repos/lidge-jun/opencodex/releases/latest")
     originals = {path: Path(path).read_text() for path in PACKAGE_ASSETS}
-    updated = update_packages(originals, json.loads(response))
+    updated = update_packages(originals, release)
     for path, content in updated.items():
         if content != originals[path]:
             Path(path).write_text(content)

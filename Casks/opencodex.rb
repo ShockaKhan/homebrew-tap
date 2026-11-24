@@ -50,7 +50,7 @@ cask "opencodex" do
     <<~EOS
       Launch OpenCodex from your application menu or run opencodex-desktop.
       Update this extracted installation with:
-        brew upgrade --cask chakachakakhan/tap/opencodex
+        brew upgrade --cask shockakakhan/tap/opencodex
     EOS
   end
 end

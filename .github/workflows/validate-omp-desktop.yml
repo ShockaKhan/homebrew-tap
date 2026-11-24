@@ -47,17 +47,17 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@848c272c7bfe984a197bd4d16383f4c106ec61e6 # 2026.09.21.1
       - name: Check recipe
         run: |
-          brew readall --aliases --os=all --arch=all chakachakakhan/tap
+          brew readall --aliases --os=all --arch=all shockakhan/tap
           brew style Casks/omp-desktop.rb
           # This personal tap intentionally packages a small upstream project
           # and keeps "desktop" in the name to distinguish the existing engine.
           brew audit --cask --new --strict --except=github_repository,token_bad_words \
-            chakachakakhan/tap/omp-desktop
+            shockakhan/tap/omp-desktop
       - name: Install desktop and the upstream OMP engine
         run: |
           brew install can1357/tap/omp
           brew test can1357/tap/omp
-          brew install --cask chakachakakhan/tap/omp-desktop
+          brew install --cask shockakhan/tap/omp-desktop
       - name: Check desktop integration and update ownership
         run: |
           test -x "$(brew --prefix)/bin/omp-desktop"
@@ -77,7 +77,7 @@ jobs:
           mkdir -p "$HOME/.config/dev.ohMyPi.desktop" "$HOME/.omp/agent"
           touch "$HOME/.config/dev.ohMyPi.desktop/tap-ci-preserve"
           touch "$HOME/.omp/agent/tap-ci-preserve"
-          brew uninstall --cask chakachakakhan/tap/omp-desktop
+          brew uninstall --cask shockakhan/tap/omp-desktop
           for artifact in \
             "$(brew --prefix)/bin/omp-desktop" \
             "$HOME/.local/share/applications/omp-desktop.desktop" \

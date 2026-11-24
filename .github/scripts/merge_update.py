@@ -24,6 +24,26 @@ FIELDS = (
 )
 
 
+def fetch_json(url, run=subprocess.check_output):
+    """Fetch JSON over HTTPS, authenticating GitHub API calls when a token is set."""
+    command = [
+        "curl", "--proto", "=https", "--tlsv1.2", "--fail", "--silent",
+        "--show-error", "--location", "--retry", "3", "--max-time", "60",
+    ]
+    config = None
+    token = (os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or "").strip()
+    if token and url.startswith("https://api.github.com/"):
+        if any(char in token for char in ('"', "\r", "\n")):
+            raise ValueError("Invalid characters in GitHub API token")
+        command += ["--config", "-"]
+        config = (
+            'header = "Accept: application/vnd.github+json"\n'
+            f'header = "Authorization: Bearer {token}"\n'
+        )
+    command.append(url)
+    return json.loads(run(command, input=config, text=True))
+
+
 def api(path, payload=None):
     command = ["gh", "api", path]
     if payload is not None:

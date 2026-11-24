@@ -1,9 +1,9 @@
 """Update only Thorium's stable version and both official asset checksums."""
 
-import json
 import re
-import subprocess
 from pathlib import Path
+
+from merge_update import fetch_json
 
 ORIGIN = "https://github.com/edrlab/thorium-reader/releases/download"
 CASK = Path("Casks/thorium-reader-linux.rb")
@@ -56,13 +56,9 @@ def update_cask(original, release):
 
 
 if __name__ == "__main__":
-    response = subprocess.check_output([
-        "curl", "--proto", "=https", "--tlsv1.2", "--fail", "--silent",
-        "--show-error", "--location", "--retry", "3", "--max-time", "60",
-        "https://api.github.com/repos/edrlab/thorium-reader/releases/latest",
-    ], text=True)
+    release = fetch_json("https://api.github.com/repos/edrlab/thorium-reader/releases/latest")
     original = CASK.read_text()
-    updated = update_cask(original, json.loads(response))
+    updated = update_cask(original, release)
     if updated != original:
         CASK.write_text(updated)
         print("Updated Thorium Reader's stable version and architecture checksums")

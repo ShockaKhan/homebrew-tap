@@ -78,7 +78,7 @@ def main():
     prefix = Path(subprocess.check_output(["brew", "--prefix"], text=True).strip()) / "opt/emacs"
     emacs, client = prefix / "bin/emacs", prefix / "bin/emacsclient"
     info = json.loads(subprocess.check_output([
-        "brew", "info", "--json=v2", "chakachakakhan/tap/emacs",
+        "brew", "info", "--json=v2", "shockakhan/tap/emacs",
     ], text=True))["formulae"][0]
     service = info["service"]["run"]
     if service != [str(prefix / "bin/emacs"), "--fg-daemon"]:

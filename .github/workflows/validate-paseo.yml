@@ -50,9 +50,9 @@ jobs:
 
       - name: Check cask
         run: |
-          brew readall --aliases --os=all --arch=all chakachakakhan/tap
+          brew readall --aliases --os=all --arch=all shockakhan/tap
           brew style Casks/paseo-linux.rb
-          brew audit --cask --new --strict chakachakakhan/tap/paseo-linux
+          brew audit --cask --new --strict shockakhan/tap/paseo-linux
 
       - name: Install desktop integration and GUI test tools
         run: |
@@ -64,7 +64,7 @@ jobs:
           PASEO_EXPECTED_VERSION="$(sed -nE 's/^  version "([^"]+)"$/\1/p' Casks/paseo-linux.rb)"
           test -n "$PASEO_EXPECTED_VERSION"
           export PASEO_EXPECTED_VERSION
-          brew install --cask chakachakakhan/tap/paseo-linux
+          brew install --cask shockakhan/tap/paseo-linux
           test -x "$(brew --prefix)/bin/paseo"
           test -x "$(brew --prefix)/bin/paseo-desktop"
           test -s "$HOME/.local/share/icons/paseo.png"
@@ -83,7 +83,7 @@ jobs:
           mkdir -p "$HOME/.paseo/worktrees/sessions"
           printf 'tap-ci-preserve\n' > "$HOME/.paseo/worktrees/sessions/tap-ci-preserve"
           current_version="$(sed -nE 's/^  version "([^"]+)"$/\1/p' Casks/paseo-linux.rb)"
-          brew uninstall --cask chakachakakhan/tap/paseo-linux
+          brew uninstall --cask shockakhan/tap/paseo-linux
           current_cask="$(mktemp)"
           cp Casks/paseo-linux.rb "$current_cask"
           restore_cask() {
@@ -105,11 +105,11 @@ jobs:
               raise SystemExit("Could not prepare the verified v0.11.4 cask fixture")
           path.write_text(content)
           PY
-          brew install --cask chakachakakhan/tap/paseo-linux
+          brew install --cask shockakhan/tap/paseo-linux
           brew list --cask --versions paseo-linux | grep -Fx 'paseo-linux 0.11.4'
           restore_cask
           trap - EXIT
-          brew upgrade --cask chakachakakhan/tap/paseo-linux
+          brew upgrade --cask shockakhan/tap/paseo-linux
           brew list --cask --versions paseo-linux | grep -Fx "paseo-linux $current_version"
           test -f "$HOME/.paseo/worktrees/sessions/tap-ci-preserve"
           test -x "$(brew --prefix)/bin/paseo"
@@ -125,7 +125,7 @@ jobs:
 
       - name: Check uninstall and preserve user sessions
         run: |
-          brew uninstall --cask chakachakakhan/tap/paseo-linux
+          brew uninstall --cask shockakhan/tap/paseo-linux
           for command in paseo paseo-desktop; do
             test ! -e "$(brew --prefix)/bin/$command"
             test ! -L "$(brew --prefix)/bin/$command"

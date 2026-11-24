@@ -82,7 +82,7 @@ cask "omp-desktop" do
       Uses your existing Oh My Pi (omp) installation and sessions.
       If needed, install the engine with brew install can1357/tap/omp.
       Launch from your application menu or run omp-desktop /path/to/project.
-      Update this installation with brew upgrade --cask chakachakakhan/tap/omp-desktop.
+      Update this installation with brew upgrade --cask shockakhan/tap/omp-desktop.
     EOS
   end
 end

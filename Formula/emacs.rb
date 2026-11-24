@@ -7,7 +7,7 @@ class Emacs < Formula
   license "GPL-3.0-or-later"
 
   bottle do
-    root_url "https://github.com/chakachakakhan/homebrew-tap/releases/download/emacs-31.1"
+    root_url "https://github.com/ShockaKhan/homebrew-tap/releases/download/emacs-31.1"
     rebuild 1
     sha256 arm64_linux:  "2c62ab0e7c560286a18b821bd7e28db8112e2ff79fe11071749f796ebc6cf354"
     sha256 x86_64_linux: "81ee49f6d9cce1bc8a0775d0eacf629b072f5dc61760debe1297880f943cf19e"

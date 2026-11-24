@@ -1,9 +1,9 @@
 """Update Paseo Linux from its complete official stable release."""
 
-import json
 import re
-import subprocess
 from pathlib import Path
+
+from merge_update import fetch_json
 
 CASK = Path("Casks/paseo-linux.rb")
 ORIGIN = "https://github.com/getpaseo/paseo/releases/download"
@@ -68,13 +68,9 @@ def update_cask(original, release):
 
 
 if __name__ == "__main__":
-    response = subprocess.check_output([
-        "curl", "--proto", "=https", "--tlsv1.2", "--fail", "--silent",
-        "--show-error", "--location", "--retry", "3", "--max-time", "60",
-        "https://api.github.com/repos/getpaseo/paseo/releases/latest",
-    ], text=True)
+    release = fetch_json("https://api.github.com/repos/getpaseo/paseo/releases/latest")
     original = CASK.read_text()
-    updated = update_cask(original, json.loads(response))
+    updated = update_cask(original, release)
     if updated != original:
         CASK.write_text(updated)
         print("Updated Paseo's stable Linux version and official SHA-256 digest")

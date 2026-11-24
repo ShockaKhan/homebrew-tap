@@ -11,7 +11,7 @@
 | Paseo | Desktop: `paseo-desktop`. CLI: `paseo`. Uninstall keeps `~/.paseo`. |
 | Emacs | PGTK/Wayland, native compilation, tree-sitter. The cask installs the formula plus menu entries. Remove the cask and formula separately; Emacs and Doom settings are preserved. |
 
-Optional Emacs daemon: `brew services start chakachakakhan/tap/emacs`, then `emacsclient -c` (window) or `emacsclient -t` (terminal).
+Optional Emacs daemon: `brew services start shockakhan/tap/emacs`, then `emacsclient -c` (window) or `emacsclient -t` (terminal).
 
 Ordinary uninstall keeps user data. Use `--zap` only when you want the cask's listed settings and data removed.
 

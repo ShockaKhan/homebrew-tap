@@ -63,17 +63,17 @@ jobs:
 
       - name: Check syntax, style, and audit
         run: |
-          brew readall --aliases --os=all --arch=all chakachakakhan/tap
+          brew readall --aliases --os=all --arch=all shockakhan/tap
           brew style Casks/*.rb
           for cask in chatgpt-linux thorium-reader-linux; do
-            brew audit --cask --new --strict "chakachakakhan/tap/$cask"
+            brew audit --cask --new --strict "shockakhan/tap/$cask"
           done
 
       - name: Install official package and check integration
         run: |
-          brew install --cask chakachakakhan/tap/chatgpt-linux
+          brew install --cask shockakhan/tap/chatgpt-linux
           version="$(sed -n 's/^  version "\([^"]*\)"$/\1/p' Casks/chatgpt-linux.rb)"
-          version_root="$(brew --caskroom chakachakakhan/tap/chatgpt-linux)/$version"
+          version_root="$(brew --caskroom shockakhan/tap/chatgpt-linux)/$version"
           test -x "$(brew --prefix)/bin/chatgpt"
           "$version_root/usr/lib/chatgpt/resources/codex" --version
           test -s "$HOME/.local/share/icons/chatgpt.png"
@@ -84,7 +84,7 @@ jobs:
 
       - name: Check uninstall cleanup
         run: |
-          brew uninstall --cask chakachakakhan/tap/chatgpt-linux
+          brew uninstall --cask shockakhan/tap/chatgpt-linux
           for artifact in \
             "$(brew --prefix)/bin/chatgpt" \
             "$HOME/.local/share/applications/chatgpt.desktop" \
@@ -96,7 +96,7 @@ jobs:
 
       - name: Install Thorium Reader and check integration
         run: |
-          brew install --cask chakachakakhan/tap/thorium-reader-linux
+          brew install --cask shockakhan/tap/thorium-reader-linux
           test -x "$(brew --prefix)/bin/thorium-reader"
           test -s "$HOME/.local/share/icons/thorium-reader.png"
           grep -Fx "Exec=$(brew --prefix)/bin/thorium-reader %U" \
@@ -115,7 +115,7 @@ jobs:
 
       - name: Check Thorium Reader uninstall cleanup
         run: |
-          brew uninstall --cask chakachakakhan/tap/thorium-reader-linux
+          brew uninstall --cask shockakhan/tap/thorium-reader-linux
           for artifact in \
             "$(brew --prefix)/bin/thorium-reader" \
             "$HOME/.local/share/applications/thorium-reader.desktop" \

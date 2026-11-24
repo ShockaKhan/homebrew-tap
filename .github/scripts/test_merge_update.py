@@ -1,10 +1,11 @@
 import base64
 import copy
+import os
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
-from merge_update import UPDATE_CASKS, REQUIRED_JOBS, merge_update, metadata_only, validation_run
+from merge_update import UPDATE_CASKS, REQUIRED_JOBS, fetch_json, merge_update, metadata_only, validation_run
 
 
 class MergePolicyTests(unittest.TestCase):
@@ -193,6 +194,32 @@ class ValidationDispatchTests(unittest.TestCase):
         request = Mock()
         self.assertIs(validation_run("owner/tap", {"workflow_run": run}, request), run)
         request.assert_not_called()
+
+
+class FetchJsonTests(unittest.TestCase):
+    def test_authenticates_github_api_via_stdin_config_only(self):
+        run = Mock(return_value='{"tag_name": "v1.0.0"}')
+        with patch.dict(os.environ, {"GH_TOKEN": "ghs_secret"}, clear=True):
+            result = fetch_json("https://api.github.com/repos/getpaseo/paseo/releases/latest", run)
+        self.assertEqual(result, {"tag_name": "v1.0.0"})
+        command = run.call_args.args[0]
+        self.assertNotIn("ghs_secret", " ".join(command))
+        self.assertIn("--config", command)
+        self.assertIn("Authorization: Bearer ghs_secret", run.call_args.kwargs["input"])
+
+    def test_skips_auth_for_non_github_urls(self):
+        run = Mock(return_value='{"ok": true}')
+        with patch.dict(os.environ, {"GH_TOKEN": "ghs_secret"}, clear=True):
+            result = fetch_json("https://example.com/releases.json", run)
+        self.assertEqual(result, {"ok": True})
+        command = run.call_args.args[0]
+        self.assertNotIn("--config", command)
+        self.assertIsNone(run.call_args.kwargs["input"])
+
+    def test_rejects_multiline_token(self):
+        with patch.dict(os.environ, {"GH_TOKEN": "bad\ntoken"}, clear=True):
+            with self.assertRaises(ValueError):
+                fetch_json("https://api.github.com/repos/getpaseo/paseo/releases/latest", Mock())
 
 
 if __name__ == "__main__":

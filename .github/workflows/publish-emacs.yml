@@ -97,7 +97,7 @@ jobs:
           git checkout -B main origin/main
           GITHUB_SHA="$(git rev-parse HEAD)"
           export GITHUB_SHA
-          brew pr-pull --tap=chakachakakhan/tap --workflows=validate-emacs.yml \
+          brew pr-pull --tap=shockakakhan/tap --workflows=validate-emacs.yml \
             --head-sha="$HEAD_SHA" "$PULL_REQUEST"
       - name: Push the published recipes and bottle metadata
         uses: Homebrew/actions/git-try-push@e99025eb970cfa124b8284a35463d87426917478 # 2026.09.28.1
@@ -108,7 +108,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          emacs_info="$(brew info --json=v2 --formula chakachakakhan/tap/emacs)"
+          emacs_info="$(brew info --json=v2 --formula shockakakhan/tap/emacs)"
           emacs_tag="$(jq -er '.formulae[0].bottle.stable.root_url | split("/") | last' <<< "$emacs_info")"
           emacs_version="$(jq -er '.formulae[0].versions.stable' <<< "$emacs_info")"
           emacs_tag_sha="$(gh api "repos/$GH_REPO/git/ref/tags/$emacs_tag" --jq '.object.sha')"

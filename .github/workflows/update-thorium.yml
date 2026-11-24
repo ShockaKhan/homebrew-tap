@@ -26,6 +26,8 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Read official stable release metadata and update the cask
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python3 .github/scripts/update_thorium.py
 
       - name: Open update pull request

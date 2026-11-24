@@ -59,7 +59,7 @@ cask "paseo-linux" do
     <<~EOS
       Launch Paseo from your application menu or run paseo-desktop.
       Run the CLI with paseo. Updates are provided by Homebrew:
-        brew upgrade --cask chakachakakhan/tap/paseo-linux
+        brew upgrade --cask shockakhan/tap/paseo-linux
       Uninstalling this cask keeps your ~/.paseo agents, worktrees, and configuration.
     EOS
   end
