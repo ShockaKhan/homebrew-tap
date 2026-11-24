@@ -56,4 +56,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh workflow run validate.yml --ref automation/update-thorium-reader
+          UPDATE_SHA: ${{ steps.pull-request.outputs.pull-request-head-sha }}
+        run: |
+          set -euo pipefail
+          [[ "$UPDATE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          gh workflow run validate.yml --ref automation/update-thorium-reader
+          for attempt in {1..12}; do
+            run_id="$(gh api \
+              "repos/$GH_REPO/actions/workflows/validate.yml/runs?event=workflow_dispatch&branch=automation/update-thorium-reader&head_sha=$UPDATE_SHA&per_page=1" \
+              --jq '.workflow_runs[0].id // empty')"
+            if [[ -n "$run_id" ]]; then
+              gh workflow run merge-update.yml --ref main --field validation_run_id="$run_id"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Could not locate the dispatched validation run' >&2
+          exit 1

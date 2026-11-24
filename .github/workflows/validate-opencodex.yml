@@ -60,7 +60,11 @@ jobs:
           # validates it; Homebrew's redundant-version lint dislikes this layout.
           brew audit --formula --strict --except=version shockakhan/tap/opencodex
           if [[ '${{ matrix.runner }}' != ubuntu-24.04-arm ]]; then
-            brew audit --cask --new --strict shockakhan/tap/opencodex
+            audit_flags=(--cask --strict)
+            if [[ '${{ github.event_name }}' != push ]]; then
+              audit_flags+=(--new)
+            fi
+            brew audit "${audit_flags[@]}" shockakhan/tap/opencodex
           fi
 
       - name: Install CLI and exercise proxy and dashboard

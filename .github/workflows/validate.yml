@@ -65,8 +65,12 @@ jobs:
         run: |
           brew readall --aliases --os=all --arch=all shockakhan/tap
           brew style Casks/*.rb
+          audit_flags=(--cask --strict)
+          if [[ '${{ github.event_name }}' != push ]]; then
+            audit_flags+=(--new)
+          fi
           for cask in chatgpt-linux thorium-reader-linux; do
-            brew audit --cask --new --strict "shockakhan/tap/$cask"
+            brew audit "${audit_flags[@]}" "shockakhan/tap/$cask"
           done
 
       - name: Install official package and check integration

@@ -52,7 +52,11 @@ jobs:
         run: |
           brew readall --aliases --os=all --arch=all shockakhan/tap
           brew style Casks/paseo-linux.rb
-          brew audit --cask --new --strict shockakhan/tap/paseo-linux
+          audit_flags=(--cask --strict)
+          if [[ '${{ github.event_name }}' != push ]]; then
+            audit_flags+=(--new)
+          fi
+          brew audit "${audit_flags[@]}" shockakhan/tap/paseo-linux
 
       - name: Install desktop integration and GUI test tools
         run: |

@@ -1,5 +1,6 @@
 """Merge a bot's metadata-only update after validation of that exact revision."""
 
+import argparse
 import base64
 import json
 import os
@@ -154,7 +155,16 @@ def validation_run(repo, event, request=api, pause=time.sleep):
     raise TimeoutError("Validation did not finish; leave the PR open for retry")
 
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--wait-only", action="store_true")
+    args = parser.parse_args()
     event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text())
     repo = os.environ["GH_REPO"]
-    merge_update(repo, validation_run(repo, event))
+    run = validation_run(repo, event)
+    if not args.wait_only:
+        merge_update(repo, run)
+
+
+if __name__ == "__main__":
+    main()

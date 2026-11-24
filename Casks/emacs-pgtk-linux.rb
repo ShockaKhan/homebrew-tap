@@ -5,8 +5,7 @@ cask "emacs-pgtk-linux" do
   # Only desktop entries and the icon are taken from this source archive.
   # The formula supplies Emacs itself as a standard Homebrew bottle.
   # Use a fixed GNU mirror to avoid ftpmirror redirects with expired certificates.
-  url "https://mirrors.kernel.org/gnu/emacs/emacs-#{version}.tar.xz",
-      verified: "mirrors.kernel.org/gnu/emacs/"
+  url "https://mirrors.kernel.org/gnu/emacs/emacs-#{version}.tar.xz"
   name "GNU Emacs"
   desc "Desktop integration for the native Wayland build of GNU Emacs"
   homepage "https://www.gnu.org/software/emacs/"
