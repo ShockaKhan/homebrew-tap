@@ -17,7 +17,7 @@ cask "emacs-pgtk-linux" do
     strategy :page_match
   end
 
-  depends_on formula: "shockakakhan/tap/emacs"
+  depends_on formula: "shockakhan/tap/emacs"
   depends_on linux: :any
 
   artifact "emacs-#{version}/etc/emacs.desktop",
@@ -39,7 +39,7 @@ cask "emacs-pgtk-linux" do
   caveats <<~EOS
     Emacs, emacsclient, and the daemon are supplied by the emacs formula.
     To start the daemon at login:
-      brew services start shockakakhan/tap/emacs
+      brew services start shockakhan/tap/emacs
     Upgrade both the formula and this desktop integration with brew upgrade.
     Uninstalling this cask removes the desktop entries and icon; uninstall the
     formula separately to remove Emacs itself. Emacs and Doom settings are preserved.

@@ -82,11 +82,11 @@ jobs:
 
       - name: Check recipes
         run: |
-          brew readall --aliases --os=all --arch=all shockakakhan/tap
+          brew readall --aliases --os=all --arch=all shockakhan/tap
           brew style Formula/emacs.rb Casks/emacs-pgtk-linux.rb
-          brew audit --formula --strict shockakakhan/tap/emacs
+          brew audit --formula --strict shockakhan/tap/emacs
           # Check this package, independently of GNU's homepage/release index.
-          brew audit --cask --strict shockakakhan/tap/emacs-pgtk-linux
+          brew audit --cask --strict shockakhan/tap/emacs-pgtk-linux
 
       # Homebrew's test-bot builds, bottles, pours the bottle, checks linkage,
       # and runs the formula's real native-compilation test.
@@ -130,12 +130,12 @@ jobs:
               | cmp Formula/emacs.rb -
             HOMEBREW_DEVELOPER=1 brew install --only-dependencies "${bottles[0]}"
             HOMEBREW_DEVELOPER=1 brew install "${bottles[0]}"
-            brew test shockakakhan/tap/emacs
-            brew linkage --test --strict shockakakhan/tap/emacs
+            brew test shockakhan/tap/emacs
+            brew linkage --test --strict shockakhan/tap/emacs
             cp -- "$RUNNER_TEMP"/emacs-retry/emacs--*.bottle.json "${bottles[0]}" .
           else
             # Downloads verify SHA-256; mirror availability must not discard a tested bottle.
-            brew test-bot --only-formulae --skip-dependents --skip-online-checks --testing-formulae=shockakakhan/tap/emacs
+            brew test-bot --only-formulae --skip-dependents --skip-online-checks --testing-formulae=shockakhan/tap/emacs
           fi
           bottles=(emacs--*.bottle*.tar.gz)
           if (( ${#bottles[@]} != 1 )); then
@@ -213,14 +213,14 @@ jobs:
 
       - name: Install the published bottle as a user would
         if: github.event_name == 'push' || inputs.published == true
-        run: brew install --force-bottle shockakakhan/tap/emacs
+        run: brew install --force-bottle shockakhan/tap/emacs
 
       - name: Install desktop integration around the poured bottle
         run: |
-          brew install --only-dependencies shockakakhan/tap/emacs
-          brew install --cask shockakakhan/tap/emacs-pgtk-linux
-          brew test shockakakhan/tap/emacs
-          brew linkage --test shockakakhan/tap/emacs
+          brew install --only-dependencies shockakhan/tap/emacs
+          brew install --cask shockakhan/tap/emacs-pgtk-linux
+          brew test shockakhan/tap/emacs
+          brew linkage --test shockakhan/tap/emacs
           test -s "$HOME/.local/share/icons/emacs.svg"
           grep -Fx "Exec=$(brew --prefix)/opt/emacs/bin/emacs %F" \
             "$HOME/.local/share/applications/emacs.desktop"
@@ -241,9 +241,9 @@ jobs:
             mkdir -p "$directory"
             touch "$directory/tap-ci-preserve"
           done
-          brew uninstall --cask shockakakhan/tap/emacs-pgtk-linux
-          test -x "$(brew --prefix shockakakhan/tap/emacs)/bin/emacs"
-          brew uninstall --formula shockakakhan/tap/emacs
+          brew uninstall --cask shockakhan/tap/emacs-pgtk-linux
+          test -x "$(brew --prefix shockakhan/tap/emacs)/bin/emacs"
+          brew uninstall --formula shockakhan/tap/emacs
           for artifact in \
             "$(brew --prefix)/bin/emacs" \
             "$(brew --prefix)/bin/emacsclient" \
