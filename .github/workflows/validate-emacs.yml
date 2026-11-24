@@ -10,15 +10,6 @@ on:
       - .github/workflows/publish-emacs.yml
       - .github/scripts/*emacs*
       - .github/scripts/merge_update.py
-  pull_request:
-    paths:
-      - Formula/emacs.rb
-      - Casks/emacs-pgtk-linux.rb
-      - .github/workflows/validate-emacs.yml
-      - .github/workflows/publish-emacs.yml
-      - .github/workflows/update-emacs.yml
-      - .github/scripts/*emacs*
-      - .github/scripts/merge_update.py
   workflow_dispatch:
     inputs:
       published:

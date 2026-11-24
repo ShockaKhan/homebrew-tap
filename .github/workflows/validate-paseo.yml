@@ -8,12 +8,6 @@ on:
       - .github/scripts/*paseo*
       - .github/scripts/merge_update.py
       - .github/workflows/*paseo*
-  pull_request:
-    paths:
-      - Casks/paseo-linux.rb
-      - .github/scripts/*paseo*
-      - .github/scripts/merge_update.py
-      - .github/workflows/*paseo*
   workflow_dispatch:
 
 permissions:

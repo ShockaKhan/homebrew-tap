@@ -9,13 +9,6 @@ on:
       - .github/scripts/*opencodex*
       - .github/scripts/merge_update.py
       - .github/workflows/*opencodex*
-  pull_request:
-    paths:
-      - Formula/opencodex.rb
-      - Casks/opencodex.rb
-      - .github/scripts/*opencodex*
-      - .github/scripts/merge_update.py
-      - .github/workflows/*opencodex*
   workflow_dispatch:
 
 permissions:
