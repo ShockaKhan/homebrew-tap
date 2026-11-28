@@ -1,0 +1,113 @@
+name: autobump
+
+on:
+  schedule:
+    - cron: "23 5 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: autobump
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  detect:
+    name: Find outdated casks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: write # re-enabling this workflow resets GitHub's 60-day idle shutdown
+    outputs:
+      matrix: ${{ steps.outdated.outputs.matrix }}
+    steps:
+      - id: homebrew
+        uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
+        with:
+          token: ${{ github.token }}
+      - id: outdated
+        env:
+          TAP: ${{ steps.homebrew.outputs.tap-name }}
+        run: |
+          # Formulae (Emacs, which needs bottles) are bumped by hand, so only casks here.
+          brew livecheck --tap "$TAP" --cask --newer-only --json > outdated.json
+          python3 -I - <<'PY'
+          import json, os
+          skip = {"emacs-pgtk-linux"}  # versioned together with the emacs formula
+          include = [{"cask": e["cask"], "version": e["version"]["latest"]}
+                     for e in json.load(open("outdated.json"))
+                     if e.get("cask") and e["cask"] not in skip]
+          print(json.dumps(include, indent=1))
+          open(os.environ["GITHUB_OUTPUT"], "a").write(f"matrix={json.dumps({'include': include})}\n")
+          PY
+      - name: Keep the schedule alive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/autobump.yml/enable"
+
+  bump:
+    name: ${{ matrix.cask }} ${{ matrix.version }}
+    needs: detect
+    if: ${{ fromJSON(needs.detect.outputs.matrix).include[0] != null }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - id: homebrew
+        uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
+        with:
+          token: ${{ github.token }}
+      - uses: Homebrew/actions/git-user-config@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
+
+      - name: Rewrite the cask (version and checksums from the real downloads)
+        env:
+          TAP: ${{ steps.homebrew.outputs.tap-name }}
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
+        run: brew bump-cask-pr --write-only --no-audit --no-fork --version "${{ matrix.version }}" "$TAP/${{ matrix.cask }}"
+
+      - name: Install, verify, uninstall
+        id: check
+        continue-on-error: true
+        env:
+          TAP: ${{ steps.homebrew.outputs.tap-name }}
+        run: python3 -I "${{ steps.homebrew.outputs.repository-path }}/.github/ci/check_cask.py" "${{ matrix.cask }}"
+
+      - name: Commit to main, or open a PR if the checks failed
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CASK: ${{ matrix.cask }}
+          VERSION: ${{ matrix.version }}
+          CHECK: ${{ steps.check.outcome }}
+        run: |
+          git add "Casks/$CASK.rb"
+          git commit -m "$CASK $VERSION"
+          remote="https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY"
+          if [[ "$CHECK" == success ]]; then
+            for attempt in 1 2 3; do
+              git fetch "$remote" main
+              git rebase FETCH_HEAD
+              git push "$remote" HEAD:main && exit 0
+              sleep 5
+            done
+            echo "Could not push to main" >&2
+            exit 1
+          fi
+          # Failed checks never touch main; the PR is the signal.
+          branch="bump/$CASK"
+          git push --force "$remote" "HEAD:refs/heads/$branch"
+          if [[ -z "$(gh pr list --head "$branch" --json number --jq '.[0].number')" ]]; then
+            gh pr create --head "$branch" --base main \
+              --title "$CASK $VERSION (install check failed)" \
+              --body "Autobump could not verify this update: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi

@@ -1,0 +1,131 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+env:
+  # Smoke-launched under Xvfb. Everything else gets install/uninstall checks only.
+  SMOKE_CASKS: "thorium-reader-linux paseo-linux omp-desktop opencodex"
+  # Covered by the Emacs workflows (they need the formula's bottle).
+  SKIP_INSTALL: "emacs-pgtk-linux"
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      casks: ${{ steps.plan.outputs.casks }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: plan
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          python3 -I - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+
+          base = os.environ["BASE"]
+          if base and set(base) != {"0"}:
+              diff = subprocess.run(["git", "diff", "--name-only", base, "HEAD", "--", "Casks"],
+                                    check=True, text=True, capture_output=True).stdout.split()
+              changed = {Path(p).stem for p in diff if Path(p).exists()}
+          else:
+              changed = {p.stem for p in Path("Casks").glob("*.rb")}
+          # Edits to the CI itself re-test every cask.
+          if subprocess.run(["git", "diff", "--quiet", base or "HEAD", "HEAD", "--", ".github/ci",
+                             ".github/workflows/tests.yml"]).returncode:
+              changed = {p.stem for p in Path("Casks").glob("*.rb")}
+          skip = set(os.environ["SKIP_INSTALL"].split())
+          smoke = set(os.environ["SMOKE_CASKS"].split())
+          include = []
+          for token in sorted(changed - skip):
+              arm = "arm64_linux" in Path(f"Casks/{token}.rb").read_text()
+              for runner in ["ubuntu-24.04"] + (["ubuntu-24.04-arm"] if arm else []):
+                  include.append({"cask": token, "runner": runner, "smoke": token in smoke})
+          out = Path(os.environ["GITHUB_OUTPUT"]).open("a")
+          out.write(f"casks={' '.join(sorted(changed))}\n")
+          out.write(f"matrix={json.dumps({'include': include})}\n")
+          PY
+
+  tap:
+    name: Style and audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: plan
+    permissions:
+      contents: read
+    steps:
+      - id: homebrew
+        uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
+        with:
+          token: ${{ github.token }}
+      - name: Check every recipe parses and passes style
+        env:
+          TAP: ${{ steps.homebrew.outputs.tap-name }}
+        run: |
+          brew readall --aliases --os=all --arch=all "$TAP"
+          brew style "$(brew --repository "$TAP")"
+      - name: Audit changed casks
+        # Only changed casks: upstream moving on must never fail an unrelated change.
+        env:
+          TAP: ${{ steps.homebrew.outputs.tap-name }}
+          CASKS: ${{ needs.plan.outputs.casks }}
+        run: |
+          for cask in $CASKS; do
+            brew audit --cask --strict "$TAP/$cask"
+          done
+
+  casks:
+    name: ${{ matrix.cask }} (${{ matrix.runner }})
+    needs: plan
+    if: ${{ fromJSON(needs.plan.outputs.matrix).include[0] != null }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    permissions:
+      contents: read
+    steps:
+      - id: homebrew
+        uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
+        with:
+          token: ${{ github.token }}
+      - name: Prepare a virtual display and Electron's user-namespace sandbox
+        if: matrix.smoke
+        run: |
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          sudo apt-get update
+          sudo apt-get install -y xvfb x11-utils dbus-x11 libgl1-mesa-dri libwebkit2gtk-4.1-0 libayatana-appindicator3-1
+      - name: Install, verify, ${{ matrix.smoke && 'launch, ' || '' }}uninstall
+        env:
+          TAP: ${{ steps.homebrew.outputs.tap-name }}
+          CHECK: ${{ steps.homebrew.outputs.repository-path }}/.github/ci/check_cask.py
+          SMOKE: ${{ matrix.smoke && '--smoke' || '' }}
+        run: |
+          if [[ -n "$SMOKE" ]]; then
+            dbus-run-session -- xvfb-run -a python3 -I "$CHECK" "${{ matrix.cask }}" --smoke
+          else
+            python3 -I "$CHECK" "${{ matrix.cask }}"
+          fi

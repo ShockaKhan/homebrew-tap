@@ -1,22 +1,43 @@
-# My Homebrew tap
+# homebrew-tap
 
-[![Install checks](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/validate.yml) [![Update checks](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/update.yml/badge.svg?branch=main)](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/update.yml) [![Thorium](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/update-thorium.yml/badge.svg?branch=main)](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/update-thorium.yml)
+[![tests](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/tests.yml/badge.svg)](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/tests.yml)
+[![autobump](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/autobump.yml/badge.svg)](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/autobump.yml)
 
-[![OpenCodex](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/validate-opencodex.yml/badge.svg?branch=main)](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/validate-opencodex.yml) [![OMP Desktop](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/validate-omp-desktop.yml/badge.svg?branch=main)](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/validate-omp-desktop.yml) [![Emacs](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/validate-emacs.yml/badge.svg?branch=main)](https://github.com/ShockaKhan/homebrew-tap/actions/workflows/validate-emacs.yml)
+Linux desktop apps for [Homebrew](https://brew.sh), installed from the vendors' official packages without root. Built for immutable distros such as Bluefin and Bazzite.
 
-A personal tap for Linux apps I use.
+```sh
+brew tap shockakhan/tap
+brew install --cask shockakhan/tap/<name>
+```
 
-| Package | Install | Architecture |
+| Cask | App | Run | Arch |
+| --- | --- | --- | --- |
+| `chatgpt-linux` | ChatGPT | `chatgpt` | x86_64, arm64 |
+| `claude-desktop-linux` | Claude (beta) | `claude-desktop` | x86_64, arm64 |
+| `thorium-reader-linux` | Thorium Reader | `thorium-reader` | x86_64, arm64 |
+| `paseo-linux` | Paseo | `paseo-desktop`, `paseo` | x86_64 |
+| `omp-desktop` | OMP Desktop (needs `brew install can1357/tap/omp`) | `omp-desktop /path` | x86_64 |
+| `opencodex` | OpenCodex desktop | `opencodex-desktop` | x86_64 |
+| `opencodex-cli` | OpenCodex CLI and proxy | `ocx`, `opencodex` | x86_64, arm64 |
+| `emacs-pgtk-linux` | Desktop entries for the Emacs formula | | x86_64, arm64 |
+
+| Formula | App | Arch |
 | --- | --- | --- |
-| ChatGPT | `brew install --cask shockakhan/tap/chatgpt-linux` | x86_64, ARM64 |
-| Thorium Reader | `brew install --cask shockakhan/tap/thorium-reader-linux` | x86_64, ARM64 |
-| OpenCodex desktop | `brew install --cask shockakhan/tap/opencodex` | x86_64 |
-| OpenCodex CLI | `brew install --formula shockakhan/tap/opencodex` | x86_64, ARM64 |
-| OMP Desktop | `brew install --cask shockakhan/tap/omp-desktop` | x86_64 |
-| Paseo | `brew install --cask shockakhan/tap/paseo-linux` | x86_64 |
-| Emacs + desktop entries | `brew install --cask shockakhan/tap/emacs-pgtk-linux` | x86_64, ARM64 |
-| Emacs only | `brew install --formula shockakhan/tap/emacs` | x86_64, ARM64 |
+| `emacs` | GNU Emacs: Wayland (PGTK), native compilation, tree-sitter. Prebuilt bottles. Optional daemon: `brew services start shockakhan/tap/emacs` | x86_64, arm64 |
 
-Update with `brew update && brew upgrade`. Remove a package with `brew uninstall`.
+Update with `brew update && brew upgrade`. Uninstalling keeps your app data; `brew uninstall --zap` removes what each cask lists.
 
-See [notes](docs/maintenance.md) for launch commands, package quirks, and maintenance.
+## How it works
+
+Casks extract the vendor's `.deb`, AppImage or tarball into the Caskroom. Maintainer scripts never run, nothing is written outside `$HOME` and the Homebrew prefix, and `.desktop` entries are rewritten to point at Homebrew's `bin`.
+
+- **`tests`**: on every PR and push. Style and `readall` for the whole tap, `brew audit` and an install, verify and uninstall run for each changed cask (both architectures where supported). GUI apps are also launched under Xvfb and must open a window.
+- **`autobump`**: daily. Finds outdated casks with `brew livecheck`, rewrites version and checksums from the real downloads with `brew bump-cask-pr`, runs the same install check, and commits to `main`. If the check fails it opens a PR instead and never touches `main`.
+- **Emacs** is bumped by hand: change `Formula/emacs.rb` in a PR, let `validate-emacs` build and test the bottles, then run **Publish tested Emacs bottles**.
+
+Local check before a PR:
+
+```sh
+brew style Casks Formula && brew audit --cask --strict shockakhan/tap/<name>
+python3 .github/ci/check_cask.py <name>   # installs, verifies, uninstalls
+```
