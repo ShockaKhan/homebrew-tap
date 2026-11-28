@@ -9,6 +9,7 @@ A personal tap for Linux apps I use.
 | Package | Install | Architecture |
 | --- | --- | --- |
 | ChatGPT | `brew install --cask shockakhan/tap/chatgpt-linux` | x86_64, ARM64 |
+| Claude (beta) | `brew install --cask shockakhan/tap/claude-desktop-linux` | x86_64, ARM64 |
 | Thorium Reader | `brew install --cask shockakhan/tap/thorium-reader-linux` | x86_64, ARM64 |
 | OpenCodex desktop | `brew install --cask shockakhan/tap/opencodex` | x86_64 |
 | OpenCodex CLI | `brew install --formula shockakhan/tap/opencodex` | x86_64, ARM64 |

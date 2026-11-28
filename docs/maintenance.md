@@ -5,6 +5,7 @@
 | App | Notes |
 | --- | --- |
 | ChatGPT | Launch with `chatgpt`. |
+| Claude | Launch with `claude-desktop`. Linux beta; built for Debian, so unverified on Fedora-based hosts. Cowork needs host QEMU, KVM and `virtiofsd`. Version bumps are manual. |
 | Thorium Reader | Launch with `thorium-reader`. `--zap` deletes the default library and settings in `~/.config/EDRLab.ThoriumReader`. |
 | OpenCodex | Desktop: `opencodex-desktop`. CLI: `ocx` or `opencodex`; dashboard: `http://localhost:10100`. The cask's `--zap` also removes `~/.opencodex`, shared with the CLI. |
 | OMP Desktop | Needs the engine: `brew install can1357/tap/omp`. Launch with `omp-desktop /path/to/project`. |
