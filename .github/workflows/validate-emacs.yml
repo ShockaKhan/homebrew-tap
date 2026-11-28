@@ -9,7 +9,6 @@ on:
       - .github/workflows/validate-emacs.yml
       - .github/workflows/publish-emacs.yml
       - .github/scripts/*emacs*
-      - .github/scripts/merge_update.py
   workflow_dispatch:
     inputs:
       published:
