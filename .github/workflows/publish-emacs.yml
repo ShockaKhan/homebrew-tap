@@ -72,7 +72,7 @@ jobs:
       issues: read
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@e99025eb970cfa124b8284a35463d87426917478 # 2026.09.28.1
+        uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
         with:
           token: ${{ github.token }}
       - name: Recheck the PR immediately before publication
@@ -83,7 +83,7 @@ jobs:
         run: python3 .github/scripts/publish_emacs.py --run-id "$RUN_ID"
       - name: Set up Git identity
         id: git
-        uses: Homebrew/actions/git-user-config@e99025eb970cfa124b8284a35463d87426917478 # 2026.09.28.1
+        uses: Homebrew/actions/git-user-config@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
       # This is the publisher from brew tap-new, scoped to the Emacs workflow.
       - name: Publish the exact tested source and Homebrew bottles
         env:
@@ -100,7 +100,7 @@ jobs:
           brew pr-pull --tap=shockakhan/tap --workflows=validate-emacs.yml \
             --head-sha="$HEAD_SHA" "$PULL_REQUEST"
       - name: Push the published recipes and bottle metadata
-        uses: Homebrew/actions/git-try-push@e99025eb970cfa124b8284a35463d87426917478 # 2026.09.28.1
+        uses: Homebrew/actions/git-try-push@61b401267256bb9c047d6d1481b176d5772a0ba7 # 2026.11.23.1
         with:
           branch: main
       - name: Associate the release with its published Emacs commit
