@@ -6,10 +6,21 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess
 import time
 
-from merge_update import api
 from update_emacs import PACKAGES, metadata_only
+
+
+def api(path, payload=None):
+    command = ["gh", "api", path]
+    if payload is not None:
+        command += ["--method", "PUT", "--input", "-"]
+    return json.loads(subprocess.check_output(
+        command, input=json.dumps(payload) if payload is not None else None,
+        text=True,
+    ))
+
 
 BRANCH = "automation/update-emacs"
 WORKFLOW = ".github/workflows/validate-emacs.yml"
