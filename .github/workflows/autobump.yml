@@ -94,7 +94,7 @@ jobs:
           git commit -m "$CASK $VERSION"
           remote="https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY"
           if [[ "$CHECK" == success ]]; then
-            for attempt in 1 2 3; do
+            for _ in 1 2 3; do
               git fetch "$remote" main
               git rebase FETCH_HEAD
               git push "$remote" HEAD:main && exit 0
