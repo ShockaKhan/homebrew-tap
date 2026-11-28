@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - Casks/chatgpt-linux.rb
+      - Casks/claude-desktop-linux.rb
       - Casks/thorium-reader-linux.rb
       - .github/scripts/*thorium*
       - .github/scripts/merge_update.py
@@ -12,6 +13,7 @@ on:
       - .github/workflows/merge-update.yml
       - .github/workflows/update-thorium.yml
       - .github/workflows/update.yml
+      - .github/workflows/update-claude.yml
       - .github/workflows/validate.yml
   workflow_dispatch:
 
@@ -58,7 +60,7 @@ jobs:
           if [[ '${{ github.event_name }}' != push ]]; then
             audit_flags+=(--new)
           fi
-          for cask in chatgpt-linux thorium-reader-linux; do
+          for cask in chatgpt-linux claude-desktop-linux thorium-reader-linux; do
             brew audit "${audit_flags[@]}" "shockakhan/tap/$cask"
           done
 
@@ -83,6 +85,23 @@ jobs:
             "$HOME/.local/share/applications/chatgpt.desktop" \
             "$HOME/.local/share/icons/chatgpt.png" \
             "$HOME/.local/share/metainfo/com.openai.chatgpt.metainfo.xml"; do
+            test ! -e "$artifact"
+            test ! -L "$artifact"
+          done
+
+      - name: Install Claude and check integration
+        run: |
+          brew install --cask shockakhan/tap/claude-desktop-linux
+          test -x "$(brew --prefix)/bin/claude-desktop"
+          test -s "$HOME/.local/share/icons/claude-desktop.png"
+          grep -Fx "Exec=$(brew --prefix)/bin/claude-desktop %U" \
+            "$HOME/.local/share/applications/com.anthropic.Claude.desktop"
+          grep -Fx 'Icon=claude-desktop' "$HOME/.local/share/applications/com.anthropic.Claude.desktop"
+          brew uninstall --cask shockakhan/tap/claude-desktop-linux
+          for artifact in \
+            "$(brew --prefix)/bin/claude-desktop" \
+            "$HOME/.local/share/applications/com.anthropic.Claude.desktop" \
+            "$HOME/.local/share/icons/claude-desktop.png"; do
             test ! -e "$artifact"
             test ! -L "$artifact"
           done

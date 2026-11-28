@@ -9,7 +9,7 @@ on:
         type: string
   workflow_run:
     workflows: [Validate Linux casks]
-    branches: [automation/update-chatgpt, automation/update-thorium-reader]
+    branches: [automation/update-chatgpt, automation/update-claude-desktop, automation/update-thorium-reader]
     types: [completed]
 
 permissions: {}

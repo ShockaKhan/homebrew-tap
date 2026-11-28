@@ -11,6 +11,7 @@ from pathlib import Path
 
 UPDATE_CASKS = {
     "automation/update-chatgpt": "Casks/chatgpt-linux.rb",
+    "automation/update-claude-desktop": "Casks/claude-desktop-linux.rb",
     "automation/update-thorium-reader": "Casks/thorium-reader-linux.rb",
 }
 REQUIRED_JOBS = {
